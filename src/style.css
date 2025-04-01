@@ -1,0 +1,26 @@
+:root {
+  --tg-theme-bg-color: #FFF;
+  --tg-theme-secondary-bg-color: #F3F2F8;
+  --tg-theme-text-color: #111;
+  --tg-theme-button-color: #59B7FF;
+  --tg-theme-header-bg-color: #def1fd;
+  --tg-theme-hint-color: #777;
+}
+
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+

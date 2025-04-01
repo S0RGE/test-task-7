@@ -1,0 +1,1 @@
+export type ITimeFormat = '24h' | '12h';
