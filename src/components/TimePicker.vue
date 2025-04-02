@@ -1,6 +1,6 @@
 <template>
   <main class="main">
-    <div class="time-picker" v-if="!modalIsOpened" @click="toggleModal">
+    <div class="time-picker" v-if="!modalIsOpened" @click.stop="toggleModal">
       <h1 class="time-picker__title">{{ title }}</h1>
       <div class="time-picker__main">
         <span>{{ modelValue || defaultTime }}</span>
@@ -10,7 +10,7 @@
     </div>
     <transition name="modal">
       <div class="time-picker__modal" v-if="modalIsOpened">
-        <div class="modal-wrapper">
+        <div class="modal-wrapper" ref="modalWrapperRef">
           <div class="picker-columns">
             <TimePickerColumn
               type="hours"
@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onBeforeUnmount } from "vue";
 import TimePickerColumn from "./TimePickerColumn.vue";
 import type { ITimeFormat } from "../types";
 
@@ -80,7 +80,18 @@ const setMinutes = (value: number) => {
   minutes.value = value;
 };
 
+const modalWrapperRef = ref<HTMLElement | null>(null);
+const handleClickOutside = (event: MouseEvent) => {
+  if (
+    modalWrapperRef.value &&
+    !modalWrapperRef.value.contains(event.target as Node)
+  ) {
+    toggleModal();
+  }
+};
+
 const modalIsOpened = ref(false);
+
 const toggleModal = () => {
   if (!props.modelValue) {
     const currentTime = new Date();
@@ -90,13 +101,22 @@ const toggleModal = () => {
   modalIsOpened.value = !modalIsOpened.value;
 };
 
-watch(modalIsOpened, (newValue) => {
-  if (!newValue) {
+watch(modalIsOpened, (newValue, oldValue) => {
+  if (newValue) {
+    document.addEventListener("click", handleClickOutside);
+  } else {
+    document.removeEventListener("click", handleClickOutside);
+  }
+  if (modalIsOpened) {
     const time = `${String(hours.value).padStart(2, "0")}:${String(
       minutes.value
     ).padStart(2, "0")}`;
     emit("update:modelValue", time);
   }
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", handleClickOutside);
 });
 </script>
 
