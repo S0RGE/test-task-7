@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import type { ITimeFormat } from "../types";
 
 interface IProps {
@@ -61,9 +61,32 @@ const offset = ref(0);
 const startY = ref(0);
 const currentY = ref(0);
 const velocity = ref(0);
+const animationFrame = ref<number>();
 
 const isDragging = ref(false);
-const isSelected = (item: number) => item === props.selected;
+const isSelected = (item: number) => {
+  const upBorder = (2.3 - item) * ITEM_HEIGHT;
+  const downBorder = (1.3 - item) * ITEM_HEIGHT;
+  const res = offset.value <= upBorder && offset.value >= downBorder;
+  if (res) {
+    selectedValue.value = () => item;
+  }
+  return res;
+};
+
+const selectedValue = ref(() => props.selected);
+
+const animate = () => {
+  if (Math.abs(velocity.value) < 0.1) {
+    velocity.value = 0;
+    emit("change", selectedValue.value());
+    return;
+  }
+
+  offset.value += velocity.value;
+  velocity.value *= 0.85;
+  animationFrame.value = requestAnimationFrame(animate);
+};
 
 const calculateStartValue = () => {
   const index = column.value[props.type].indexOf(props.selected);
@@ -94,15 +117,7 @@ function onDrag(e: TouchEvent | MouseEvent) {
 
 function onDragEnd() {
   isDragging.value = false;
-  const index = Math.round(-offset.value / ITEM_HEIGHT);
-  const clamped = Math.max(
-    0,
-    Math.min(index, column.value[props.type].length - 1)
-  );
-  offset.value = -(clamped - 1.5) * ITEM_HEIGHT;
-  const selectedItem = column.value[props.type][clamped];
-
-  emit("change", selectedItem);
+  animate();
 }
 
 onMounted(() => {
