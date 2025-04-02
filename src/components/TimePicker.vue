@@ -80,6 +80,14 @@ const setMinutes = (value: number) => {
   minutes.value = value;
 };
 
+const currentTimepickerTime = computed(
+  () =>
+    `${String(hours.value).padStart(2, "0")}:${String(minutes.value).padStart(
+      2,
+      "0"
+    )}`
+);
+
 const modalWrapperRef = ref<HTMLElement | null>(null);
 const handleClickOutside = (event: MouseEvent) => {
   if (
@@ -93,25 +101,21 @@ const handleClickOutside = (event: MouseEvent) => {
 const modalIsOpened = ref(false);
 
 const toggleModal = () => {
+  modalIsOpened.value = !modalIsOpened.value;
   if (!props.modelValue) {
     const currentTime = new Date();
     setHours(currentTime.getHours());
     setMinutes(currentTime.getMinutes());
+    emit("update:modelValue", currentTimepickerTime.value);
   }
-  modalIsOpened.value = !modalIsOpened.value;
 };
 
-watch(modalIsOpened, (newValue, oldValue) => {
+watch(modalIsOpened, (newValue) => {
   if (newValue) {
     document.addEventListener("click", handleClickOutside);
   } else {
     document.removeEventListener("click", handleClickOutside);
-  }
-  if (modalIsOpened) {
-    const time = `${String(hours.value).padStart(2, "0")}:${String(
-      minutes.value
-    ).padStart(2, "0")}`;
-    emit("update:modelValue", time);
+    emit("update:modelValue", currentTimepickerTime.value);
   }
 });
 
