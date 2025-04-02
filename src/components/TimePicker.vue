@@ -1,6 +1,6 @@
 <template>
   <main class="main">
-    <div class="time-picker" v-if="!modalIsOpened" @click.stop="toggleModal">
+    <div class="time-picker" v-if="!modalIsOpened" @click.stop="openModal">
       <h1 class="time-picker__title">{{ title }}</h1>
       <div class="time-picker__main">
         <span>{{ modelValue || defaultTime }}</span>
@@ -27,7 +27,9 @@
               >{{ appm }}
             </span>
           </div>
-          <div class="close-modal-button" @click="toggleModal">Confirm</div>
+          <div class="close-modal-button" @click="() => closeModal(true)">
+            Confirm
+          </div>
         </div>
       </div>
     </transition>
@@ -94,20 +96,21 @@ const handleClickOutside = (event: MouseEvent) => {
     modalWrapperRef.value &&
     !modalWrapperRef.value.contains(event.target as Node)
   ) {
-    toggleModal();
+    closeModal(false);
   }
 };
 
 const modalIsOpened = ref(false);
 
-const toggleModal = () => {
-  modalIsOpened.value = !modalIsOpened.value;
-  if (!props.modelValue) {
-    const currentTime = new Date();
-    setHours(currentTime.getHours());
-    setMinutes(currentTime.getMinutes());
+const closeModal = (withSave: boolean) => {
+  modalIsOpened.value = false;
+  if (withSave) {
     emit("update:modelValue", currentTimepickerTime.value);
   }
+};
+
+const openModal = () => {
+  modalIsOpened.value = true;
 };
 
 watch(modalIsOpened, (newValue) => {
@@ -115,7 +118,6 @@ watch(modalIsOpened, (newValue) => {
     document.addEventListener("click", handleClickOutside);
   } else {
     document.removeEventListener("click", handleClickOutside);
-    emit("update:modelValue", currentTimepickerTime.value);
   }
 });
 
