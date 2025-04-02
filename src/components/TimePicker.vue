@@ -1,36 +1,38 @@
 <template>
-    <main>
-        <h1>{{ title }}</h1>
-        <div class="time-picker" v-if="!modalIsOpened">
-            <input type="checkbox" />
-            <div>
-                <span @click="toggleModal">{{
-                    modelValue || defaultTime
-                }}</span>
-                &nbsp;
-                <span class="time-picker__format">{{ appm }}</span>
-            </div>
+  <main>
+    <h1>{{ title }}</h1>
+    <div class="time-picker" v-if="!modalIsOpened">
+      <!-- <input type="checkbox" /> -->
+      <div>
+        <span @click="toggleModal">{{ modelValue || defaultTime }}</span>
+        &nbsp;
+        <span class="time-picker__format">{{ appm }}</span>
+      </div>
+    </div>
+    <transition name="modal">
+      <div class="time-picker__modal" v-if="modalIsOpened">
+        <div class="modal-wrapper">
+          <div class="picker-columns">
+            <TimePickerColumn
+              type="hours"
+              :format="timeFormat"
+              @change="setHours"
+              :selected="hours"
+            />
+            <TimePickerColumn
+              type="minutes"
+              @change="setMinutes"
+              :selected="minutes"
+            />
+            <span class="modal__format" @click="toggleTimeFormat"
+              >{{ appm }}
+            </span>
+          </div>
+          <div class="close-modal-button" @click="toggleModal">Confirm</div>
         </div>
-        <div class="time-picker__modal" v-if="modalIsOpened">
-            <div class="modal-wrapper">
-                <TimePickerColumn
-                    type="hours"
-                    :format="timeFormat"
-                    @change="setHours"
-                    :selected="hours"
-                />
-                <TimePickerColumn
-                    type="minutes"
-                    @change="setMinutes"
-                    :selected="minutes"
-                />
-                <span v-if="timeFormat === '12h'" @click="toggleTimeFormat">{{
-                    appm
-                }}</span>
-            </div>
-            <div class="close-modal-button" @click="toggleModal">Close</div>
-        </div>
-    </main>
+      </div>
+    </transition>
+  </main>
 </template>
 
 <script setup lang="ts">
@@ -39,80 +41,130 @@ import TimePickerColumn from "./TimePickerColumn.vue";
 import type { ITimeFormat } from "../types";
 
 interface IProps {
-    modelValue: string;
-    title?: string;
-    format?: ITimeFormat;
-    minTime?: string;
-    maxTime?: string;
+  modelValue: string;
+  title?: string;
+  format?: ITimeFormat;
+  minTime?: string;
+  maxTime?: string;
 }
 
-withDefaults(defineProps<IProps>(), {
-    modelValue: "",
-    title: "Time Picker",
-    format: "24h",
-    minTime: "00:00",
-    maxTime: "23:59",
+const props = withDefaults(defineProps<IProps>(), {
+  modelValue: "",
+  title: "Time Picker",
+  format: "24h",
+  minTime: "00:00",
+  maxTime: "23:59",
 });
 
 const emit = defineEmits(["update:modelValue"]);
 
 const defaultTime = ref("--:--");
-const timeFormat = ref<ITimeFormat>("12h");
+const timeFormat = ref<ITimeFormat>("24h");
 
 const toggleTimeFormat = () => {
-    timeFormat.value = timeFormat.value === "12h" ? "24h" : "12h";
+  timeFormat.value = timeFormat.value === "12h" ? "24h" : "12h";
 };
 
 const appm = computed(() => {
-    if (timeFormat.value === "12h" && hours.value < 12) return "AM";
-    if (timeFormat.value === "12h" && hours.value > 12) return "PM";
-    return null;
+  if (timeFormat.value === "12h" && hours.value < 12) return "AM";
+  if (timeFormat.value === "12h" && hours.value > 12) return "PM";
+  return null;
 });
 
-const hours = ref<number>(0); //TODO: fix this
+const hours = ref<number>(0);
 const minutes = ref<number>(0);
+
 const setHours = (value: number) => {
-    hours.value = value;
+  hours.value = value;
 };
 const setMinutes = (value: number) => {
-    minutes.value = value;
+  minutes.value = value;
 };
 
 const modalIsOpened = ref(false);
 const toggleModal = () => {
-    modalIsOpened.value = !modalIsOpened.value;
+  if (!props.modelValue) {
+    const currentTime = new Date();
+    setHours(currentTime.getHours());
+    setMinutes(currentTime.getMinutes());
+  }
+  modalIsOpened.value = !modalIsOpened.value;
 };
 
 watch(modalIsOpened, (newValue) => {
-    if (!newValue) {
-        const time = `${String(hours.value).padStart(2, "0")}:${String(minutes.value).padStart(2, "0")}`;
-        emit("update:modelValue", time);
-    }
-});
-
-watch([hours, minutes], () => {
-    if (
-        hours.value < 0 ||
-        hours.value > 23 ||
-        minutes.value < 0 ||
-        minutes.value > 59
-    ) {
-        hours.value = 0;
-        minutes.value = 0;
-    }
+  if (!newValue) {
+    const time = `${String(hours.value).padStart(2, "0")}:${String(
+      minutes.value
+    ).padStart(2, "0")}`;
+    emit("update:modelValue", time);
+  }
 });
 </script>
 
 <style scoped lang="scss">
 .time-picker {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
-.modal-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
+.time-picker__modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: flex-end;
+  flex-direction: column;
+
+  .modal__format {
+    margin-top: 6px;
+    font-size: 1.2rem;
+    color: #fff;
+    align-self: center;
+  }
+
+  .modal-wrapper {
+    background: var(--tg-theme-text-color);
+    height: 200px;
+    padding: 16px;
+    border-radius: 12px 12px 0 0;
+
+    .picker-columns {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      height: 140px;
+    }
+
+    .close-modal-button {
+      width: 100%;
+      padding: 12px;
+      background: var(--button-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+  }
+}
+
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s;
+
+  .modal {
+    transition: transform 0.3s;
+  }
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+
+  .modal {
+    transform: translateY(100%);
+  }
 }
 </style>
