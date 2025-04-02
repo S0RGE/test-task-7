@@ -1,12 +1,11 @@
 :root {
-  --tg-theme-bg-color: #FFF;
-  --tg-theme-secondary-bg-color: #F3F2F8;
+  --tg-theme-bg-color: #fff;
+  --tg-theme-secondary-bg-color: #f3f2f8;
   --tg-theme-text-color: #111;
-  --tg-theme-button-color: #59B7FF;
+  --tg-theme-button-color: #59b7ff;
   --tg-theme-header-bg-color: #def1fd;
   --tg-theme-hint-color: #777;
 }
-
 
 body {
   margin: 0;
@@ -14,14 +13,12 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 #app {
+  width: 100%;
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
 }
-
-

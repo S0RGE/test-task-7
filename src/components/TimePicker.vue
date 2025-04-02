@@ -1,10 +1,9 @@
 <template>
-  <main>
-    <h1>{{ title }}</h1>
-    <div class="time-picker" v-if="!modalIsOpened">
-      <!-- <input type="checkbox" /> -->
-      <div>
-        <span @click="toggleModal">{{ modelValue || defaultTime }}</span>
+  <main class="main">
+    <div class="time-picker" v-if="!modalIsOpened" @click="toggleModal">
+      <h1 class="time-picker__title">{{ title }}</h1>
+      <div class="time-picker__main">
+        <span>{{ modelValue || defaultTime }}</span>
         &nbsp;
         <span class="time-picker__format">{{ appm }}</span>
       </div>
@@ -66,8 +65,8 @@ const toggleTimeFormat = () => {
 };
 
 const appm = computed(() => {
-  if (timeFormat.value === "12h" && hours.value < 12) return "AM";
-  if (timeFormat.value === "12h" && hours.value > 12) return "PM";
+  if (hours.value < 12) return "AM";
+  if (hours.value >= 12) return "PM";
   return null;
 });
 
@@ -102,9 +101,31 @@ watch(modalIsOpened, (newValue) => {
 </script>
 
 <style scoped lang="scss">
+.main {
+  width: 100%;
+}
+
 .time-picker {
+  background-color: var(--tg-theme-text-color);
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+
+  padding: 0 1rem;
+
+  .time-picker__title {
+    color: var(--tg-theme-header-bg-color);
+  }
+}
+
+.time-picker__main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--tg-theme-text-color);
+  color: var(--tg-theme-header-bg-color);
+  cursor: pointer;
 }
 
 .time-picker__modal {
