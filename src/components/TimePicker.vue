@@ -111,6 +111,11 @@ const closeModal = (withSave: boolean) => {
 
 const openModal = () => {
   modalIsOpened.value = true;
+  if (!props.modelValue) {
+    const currentDay = new Date();
+    setHours(currentDay.getHours());
+    setMinutes(currentDay.getMinutes());
+  }
 };
 
 watch(modalIsOpened, (newValue) => {
@@ -135,6 +140,7 @@ onBeforeUnmount(() => {
   background-color: var(--tg-theme-text-color);
   display: flex;
   justify-content: space-between;
+  border-radius: 8px;
 
   padding: 0 1rem;
 
@@ -152,6 +158,12 @@ onBeforeUnmount(() => {
   background: var(--tg-theme-text-color);
   color: var(--tg-theme-header-bg-color);
   cursor: pointer;
+
+  font-size: 1.3rem;
+
+  .time-picker__format {
+    font-weight: 700;
+  }
 }
 
 .time-picker__modal {
@@ -193,6 +205,7 @@ onBeforeUnmount(() => {
       border: none;
       border-radius: 8px;
       margin-top: 8px;
+      text-align: center;
     }
   }
 }

@@ -67,7 +67,7 @@ const isSelected = (item: number) => item === props.selected;
 
 const calculateStartValue = () => {
   const index = column.value[props.type].indexOf(props.selected);
-  return -(index - 1) * ITEM_HEIGHT;
+  return -(index - 1.5) * ITEM_HEIGHT;
 };
 
 function onDragStart(e: TouchEvent | MouseEvent) {
@@ -99,7 +99,7 @@ function onDragEnd() {
     0,
     Math.min(index, column.value[props.type].length - 1)
   );
-  offset.value = -(clamped - 1) * ITEM_HEIGHT;
+  offset.value = -(clamped - 1.5) * ITEM_HEIGHT;
   const selectedItem = column.value[props.type][clamped];
 
   emit("change", selectedItem);
@@ -109,7 +109,7 @@ onMounted(() => {
   if (props.selected) {
     offset.value = calculateStartValue();
   } else {
-    offset.value = 36;
+    offset.value = ITEM_HEIGHT * 1.5;
   }
 });
 </script>
