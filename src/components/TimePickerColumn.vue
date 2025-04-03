@@ -19,7 +19,10 @@
         :key="item"
         :class="{ selected: isSelected(item) }"
       >
-        {{ String(item).padStart(2, "0") }}
+        <slot name="item" :item="item"></slot>
+        <span v-if="!$slots.item">
+          {{ String(item).padStart(2, "0") }}
+        </span>
       </div>
     </div>
     <div class="fader"></div>
@@ -27,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted } from "vue";
 import type { ITimeFormat } from "../types";
 
 interface IProps {
@@ -67,11 +70,11 @@ const isDragging = ref(false);
 const isSelected = (item: number) => {
   const upBorder = (2.3 - item) * ITEM_HEIGHT;
   const downBorder = (1.3 - item) * ITEM_HEIGHT;
-  const res = offset.value <= upBorder && offset.value >= downBorder;
-  if (res) {
+  const isInRange = offset.value <= upBorder && offset.value >= downBorder;
+  if (isInRange) {
     selectedValue.value = () => item;
   }
-  return res;
+  return isInRange;
 };
 
 const selectedValue = ref(() => props.selected);

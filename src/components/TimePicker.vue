@@ -17,17 +17,39 @@
               :format="timeFormat"
               @change="setHours"
               :selected="hours"
-            />
+            >
+              <template #item="item">
+                <span
+                  :class="{ disabled: isMoreThanMaxtime || isLessThanMintime }"
+                >
+                  {{ String(item.item).padStart(2, "0") }}
+                </span>
+              </template>
+            </TimePickerColumn>
             <TimePickerColumn
               type="minutes"
               @change="setMinutes"
               :selected="minutes"
-            />
+            >
+              <template #item="item">
+                <span
+                  :class="{ disabled: isMoreThanMaxtime || isLessThanMintime }"
+                >
+                  {{ String(item.item).padStart(2, "0") }}
+                </span>
+              </template></TimePickerColumn
+            >
             <span class="modal__format" @click="toggleTimeFormat"
               >{{ appm }}
             </span>
           </div>
-          <div class="close-modal-button" @click="() => closeModal(true)">
+          <div
+            class="close-modal-button"
+            :class="{
+              'disabled-button': isMoreThanMaxtime || isLessThanMintime,
+            }"
+            @click="() => closeModal(true)"
+          >
             Confirm
           </div>
         </div>
@@ -53,8 +75,8 @@ const props = withDefaults(defineProps<IProps>(), {
   modelValue: "",
   title: "Time Picker",
   format: "24h",
-  minTime: "00:00",
-  maxTime: "23:59",
+  minTime: "02:00",
+  maxTime: "19:59",
 });
 
 const emit = defineEmits(["update:modelValue"]);
@@ -82,6 +104,20 @@ const setMinutes = (value: number) => {
   minutes.value = value;
 };
 
+const isMoreThanMaxtime = computed(() => {
+  const maxTime = props.maxTime.split(":");
+  const maxHours = Number(maxTime[0]);
+  const maxMinutes = Number(maxTime[1]);
+  return hours.value > maxHours || minutes.value > maxMinutes;
+});
+
+const isLessThanMintime = computed(() => {
+  const minTime = props.minTime.split(":");
+  const minHours = Number(minTime[0]);
+  const minMinutes = Number(minTime[1]);
+  return hours.value < minHours || minutes.value < minMinutes;
+});
+
 const currentTimepickerTime = computed(
   () =>
     `${String(hours.value).padStart(2, "0")}:${String(minutes.value).padStart(
@@ -90,6 +126,7 @@ const currentTimepickerTime = computed(
     )}`
 );
 
+const modalIsOpened = ref(false);
 const modalWrapperRef = ref<HTMLElement | null>(null);
 const handleClickOutside = (event: MouseEvent) => {
   if (
@@ -99,8 +136,6 @@ const handleClickOutside = (event: MouseEvent) => {
     closeModal(false);
   }
 };
-
-const modalIsOpened = ref(false);
 
 const closeModal = (withSave: boolean) => {
   modalIsOpened.value = false;
@@ -226,5 +261,15 @@ onBeforeUnmount(() => {
   .modal {
     transform: translateY(100%);
   }
+}
+
+.disabled {
+  color: #757575;
+}
+
+.disabled-button {
+  color: #757575 !important;
+  cursor: default !important;
+  pointer-events: none !important;
 }
 </style>
