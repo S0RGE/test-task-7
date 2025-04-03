@@ -75,8 +75,8 @@ const props = withDefaults(defineProps<IProps>(), {
   modelValue: "",
   title: "Time Picker",
   format: "24h",
-  minTime: "02:00",
-  maxTime: "19:59",
+  minTime: "02:10",
+  maxTime: "19:30",
 });
 
 const emit = defineEmits(["update:modelValue"]);
@@ -108,14 +108,20 @@ const isMoreThanMaxtime = computed(() => {
   const maxTime = props.maxTime.split(":");
   const maxHours = Number(maxTime[0]);
   const maxMinutes = Number(maxTime[1]);
-  return hours.value > maxHours || minutes.value > maxMinutes;
+  return (
+    hours.value > maxHours ||
+    (hours.value > maxHours - 1 && minutes.value > maxMinutes)
+  );
 });
 
 const isLessThanMintime = computed(() => {
   const minTime = props.minTime.split(":");
   const minHours = Number(minTime[0]);
   const minMinutes = Number(minTime[1]);
-  return hours.value < minHours || minutes.value < minMinutes;
+  return (
+    hours.value < minHours ||
+    (hours.value < minHours + 1 && minutes.value < minMinutes)
+  );
 });
 
 const currentTimepickerTime = computed(
